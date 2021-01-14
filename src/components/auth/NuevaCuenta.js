@@ -1,8 +1,28 @@
-import {useState} from 'react';
+import {useState, useContext, useEffect} from 'react';
 import {Link} from 'react-router-dom';
+import AlertaContext from '../../context/alertas/alertaContext';
+import AuthContext from '../../context/autenticacion/authContext';
 
-const NuevaCuenta = () => {
 
+const NuevaCuenta = (props) => {
+
+    //Extraer los valores del contex
+    const alertaContext = useContext(AlertaContext);
+    const {alerta, mostrarAlerta} = alertaContext; 
+
+    const authContext = useContext(AuthContext);
+    const {mensaje, autenticado, registrarUsuario} = authContext;
+
+    // En caso de que el usuario se haya autenticado o registrado o sea un registro duplicado
+    useEffect(() => {
+        if(autenticado){
+            props.history.push('/proyectos')
+        }
+
+        if(mensaje){
+            mostrarAlerta(mensaje.msg, mensaje.categoria)
+        }
+    }, [mensaje, autenticado, props.history]);
     //state para inciar sesion
 
     const [usuario, guardarUsuario] = useState({
@@ -28,18 +48,37 @@ const NuevaCuenta = () => {
         e.preventDefault();
 
         //valida que no haya campos vacios
+        if(nombre.trim() === '' || 
+           email.trim() === '' || 
+           password.trim() === '' || 
+           confirmar.trim() === ''){
+               mostrarAlerta('Todos los campos son olbigatorio', 'alerta-error');
+               return;
+           }
 
         //password minimo de 6 caracteres
-
-        //Los 2
+           if (password.length < 6 ){
+               mostrarAlerta('El password debe ser de almenos 6 caracteres', 'alerta-error');
+               return;
+           }
+        //Los 2 passwords son iguales
+        if(password !== confirmar){
+            mostrarAlerta('Los passwords no son iguales', 'alerta-error');
+               return;
+        }
 
         //Pasar el accion 
-
+        registrarUsuario({
+            nombre,
+            email,
+            password
+        });
     }
 
 
     return ( 
         <div className="form-usuario">
+            { alerta ? (<div className={`alerta ${alerta.categoria}`}> {alerta.msg} </div>) : null}
             <div className="contenedor-form sombra-dark">
                 <h1>Obtener una cuenta</h1>
                 <form onSubmit={onSubmit}>
