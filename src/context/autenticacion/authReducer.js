@@ -3,34 +3,41 @@ import {REGISTRO_EXITOSO,
         OBTENER_USUARIO,
         LOGIN_EXITOSO,
         LOGIN_ERROR,
-        CERRAR_SESION
-} from '../../types'; 
+        CERRAR_SESION} from '../../types' 
 
-export default (state, action) => {
-    switch(action.type){   
+const authReducer = (state, action) => {
+    switch(action.type) {
         case REGISTRO_EXITOSO:
         case LOGIN_EXITOSO:
-                
             localStorage.setItem('token', action.payload.token);
             return{
                 ...state,
                 autenticado: true,
-                mensaje: null
+                mensaje: null,
+                cargando: false
             }
         case OBTENER_USUARIO:    
             return{
                 ...state,
-                usuario: action.payload
+                autenticado: true,
+                usuario: action.payload,
+                cargando: false
             }
+        case CERRAR_SESION:    
         case LOGIN_ERROR:    
         case REGISTRO_ERROR:
-            localStorage.removeItem('token')
+            localStorage.removeItem('token');
             return{
                 ...state,
                 token: null,
-                mensaje: action.payload
+                usuario: null,
+                autenticado: null,
+                mensaje: action.payload,
+                cargando: false
             }
         default:
             return state;
     }
 }
+
+export default authReducer;
